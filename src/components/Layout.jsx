@@ -1,30 +1,46 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth.jsx'
+import { Avatar } from './ui.jsx'
 
 const tab = ({ isActive }) =>
-  `whitespace-nowrap px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${isActive ? 'border-white text-white' : 'border-transparent text-teal-100 hover:text-white'}`
+  `whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${isActive ? 'bg-white text-teal-700 shadow' : 'text-teal-50 hover:bg-white/15'}`
+
+const Logo = () => (
+  <span className="flex items-center gap-2.5">
+    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-teal-700 shadow">
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+    </span>
+    <span className="text-xl font-extrabold tracking-tight">CareQueue</span>
+  </span>
+)
 
 export default function Layout() {
-  const { user, logout } = useAuth(); const nav = useNavigate()
+  const { user, logout } = useAuth(); const nav = useNavigate(); const loc = useLocation()
   const role = user?.role
   const patientish = !role || role === 'PATIENT'
   return (
     <div className="min-h-screen">
-      <header className="bg-teal-600 text-white">
+      <a href="#main" className="sr-only rounded-full bg-white px-4 py-2 font-semibold text-teal-700 focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[80]">Skip to content</a>
+      <header className="rounded-b-[2rem] bg-gradient-to-b from-teal-600 to-teal-700 pb-4 text-white shadow-soft">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 pt-4">
-          <h1 className="text-xl font-extrabold tracking-tight">CareQueue</h1>
-          {user
-            ? <button className="text-sm text-teal-50 underline-offset-2 hover:underline" onClick={() => { logout(); nav('/login') }}>Sign out ({user.name.split(' ')[0]})</button>
-            : <NavLink to="/login" className="text-sm font-semibold underline-offset-2 hover:underline">Sign in</NavLink>}
+          <Logo />
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Avatar name={user.name} className="h-8 w-8 bg-white/20 text-xs" />
+              <button className="rounded-full px-3 py-1.5 text-sm font-semibold text-teal-50 transition hover:bg-white/15" onClick={() => { logout(); nav('/login') }}>Sign out</button>
+            </div>
+          ) : <NavLink to="/login" className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-teal-700 transition hover:shadow-md">Sign in</NavLink>}
         </div>
-        <nav className="mx-auto flex max-w-4xl overflow-x-auto px-2">
+        <nav aria-label="Main" className="mx-auto mt-3 flex max-w-4xl gap-1 overflow-x-auto px-3">
           {patientish && <><NavLink to="/book" className={tab}>Book a doctor</NavLink>{user && <NavLink to="/appointments" className={tab}>My tickets</NavLink>}<NavLink to="/medicine" className={tab}>Find medicine</NavLink></>}
           {role === 'HOSPITAL' && <><NavLink to="/counter" className={tab}>Live counter</NavLink><NavLink to="/schedule" className={tab}>Doctors & sessions</NavLink></>}
           {role === 'PHARMACY' && <NavLink to="/stock" className={tab}>Stock</NavLink>}
           {role === 'ADMIN' && <NavLink to="/admin" className={tab}>Console</NavLink>}
         </nav>
       </header>
-      <main className="mx-auto max-w-4xl px-4 py-6"><Outlet /></main>
+      <main id="main" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-6 outline-none">
+        <div key={loc.pathname} className="animate-fade-up"><Outlet /></div>
+      </main>
     </div>
   )
 }

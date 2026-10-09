@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { useCountdown } from '../hooks'
 import { money } from '../fmt'
+import Confetti from './Confetti.jsx'
 import { ErrorNote, Modal } from './ui.jsx'
 
 const group = (d) => d.replace(/(.{4})/g, '$1 ').trim()
@@ -33,12 +34,14 @@ export default function PaymentModal({ appointment: a, onPaid, onClose }) {
   const [f, setF] = useState({ number: '', name: '', expiry: '', cvc: '' })
   const [flip, setFlip] = useState(false)
   const [error, setError] = useState(''); const [busy, setBusy] = useState(false); const [sheet, setSheet] = useState(false)
+  const [ok, setOk] = useState(null)
 
   const pay = async (method) => {
     setBusy(true); setError('')
     try {
       const done = await api('/payments/process', { method: 'POST', body: { appointmentId: a.id, method, cardNumber: f.number, expiry: f.expiry, cvc: f.cvc, cardName: f.name } })
-      onPaid(done)
+      setSheet(false); setOk(done)
+      setTimeout(() => onPaid(done), 2300)   // let the success animation play
     } catch (e) { setError(e.message); setSheet(false) } finally { setBusy(false) }
   }
   const applePay = () => { setSheet(true); setTimeout(() => pay('APPLE_PAY'), 1400) }
@@ -49,13 +52,34 @@ export default function PaymentModal({ appointment: a, onPaid, onClose }) {
     <button type="button" onClick={() => setTab(k)} className={`flex-1 rounded-lg px-2 py-2 text-sm font-semibold transition-colors ${tab === k ? 'bg-teal-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{label}</button>
   )
 
+  if (ok) return (
+    <Modal onClose={() => onPaid(ok)} label="Booking confirmed">
+      <div className="relative py-8 text-center">
+        <Confetti />
+        <svg aria-hidden="true" viewBox="0 0 52 52" className="mx-auto h-24 w-24">
+          <circle cx="26" cy="26" r="24" fill="none" strokeWidth="3" className="stroke-emerald-600" />
+          <path d="M14 27l8 8 16-17" fill="none" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="60" className="animate-draw stroke-emerald-600" />
+        </svg>
+        <h2 className="mt-4 animate-fade-up text-2xl font-extrabold text-slate-800">You're booked</h2>
+        <p className="mt-1 text-sm text-slate-600">{ok.doctorName}, {ok.hospitalName}</p>
+        <p className="mt-4 animate-pop text-6xl font-extrabold text-teal-700 tabular-nums">#{ok.tokenNumber}</p>
+        <p className="mt-2 text-sm text-slate-500">{ok.paymentStatus === 'PAID' ? 'Payment received.' : 'Pay at the counter on arrival.'} Taking you to your ticket…</p>
+      </div>
+    </Modal>
+  )
+
   return (
     <Modal onClose={onClose} label="Payment">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div><h2 className="text-lg font-bold text-teal-700">Confirm token #{a.tokenNumber}</h2>
           <p className="text-sm text-slate-600">{a.doctorName}, {a.hospitalName}</p></div>
-        <div className={`rounded-lg px-3 py-1.5 text-center ${left < 120 ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-700'}`}>
-          <p className="text-[11px]">Held for</p><p className="text-lg font-extrabold tabular-nums">{mm}:{ss}</p>
+        <div className={`relative h-16 w-16 shrink-0 ${left < 120 ? 'text-red-700' : 'text-slate-700'}`} role="timer" aria-label={`Token held for ${mm} minutes ${ss} seconds`}>
+          <svg aria-hidden="true" viewBox="0 0 40 40" className="-rotate-90">
+            <circle cx="20" cy="20" r="17" fill="none" strokeWidth="3.5" className="stroke-slate-200" />
+            <circle cx="20" cy="20" r="17" fill="none" strokeWidth="3.5" strokeLinecap="round" className={left < 120 ? 'stroke-red-600' : 'stroke-teal-600'}
+              strokeDasharray="106.8" strokeDashoffset={106.8 * (1 - Math.min(1, left / 600))} style={{ transition: 'stroke-dashoffset 1s linear' }} />
+          </svg>
+          <span className="absolute inset-0 flex flex-col items-center justify-center text-[13px] font-extrabold leading-none tabular-nums">{mm}:{ss}<span className="mt-0.5 text-[9px] font-semibold text-slate-500">HELD</span></span>
         </div>
       </div>
 

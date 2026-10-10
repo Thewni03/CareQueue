@@ -3,14 +3,62 @@
 @tailwind utilities;
 
 @layer components {
-  .btn { @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn { @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold transition duration-150 hover:-translate-y-px hover:shadow-md active:translate-y-0 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50; }
   .btn-confirm { @apply btn bg-emerald-600 text-white hover:bg-emerald-700; }
   .btn-teal { @apply btn bg-teal-600 text-white hover:bg-teal-700; }
   .btn-outline { @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-100; }
   .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
   .btn-staff { @apply btn bg-blue-600 text-white hover:bg-blue-700; }
-  .card { @apply rounded-xl border border-slate-200 bg-white p-5; }
-  .input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600; }
+  .card { @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition duration-200; }
+  .input { @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm transition focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/25; }
   .label { @apply mb-1 block text-sm font-medium text-slate-600; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* children of .stagger fade up one after another */
+.stagger > * { animation: fadeUp .45s ease-out both; }
+.stagger > *:nth-child(2) { animation-delay: .06s; }
+.stagger > *:nth-child(3) { animation-delay: .12s; }
+.stagger > *:nth-child(4) { animation-delay: .18s; }
+.stagger > *:nth-child(5) { animation-delay: .24s; }
+.stagger > *:nth-child(n+6) { animation-delay: .3s; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ================= Accessibility modes (toggled by the widget) ================= */
+html.a11y-font, html.a11y-font body, html.a11y-font button, html.a11y-font input, html.a11y-font select, html.a11y-font textarea {
+  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif !important;
+}
+html.a11y-spacing body { letter-spacing: .05em; word-spacing: .16em; }
+html.a11y-spacing p, html.a11y-spacing li, html.a11y-spacing label { line-height: 1.8; }
+html.a11y-gray { filter: grayscale(1); }
+html.a11y-links a, html.a11y-links button { text-decoration: underline !important; outline: 2px solid #0f172a; outline-offset: 2px; }
+html.a11y-focus *:focus-visible { outline: 4px solid #f59e0b !important; outline-offset: 3px !important; }
+html.a11y-motion *, html.a11y-motion *::before, html.a11y-motion *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+html.a11y-cursor, html.a11y-cursor * {
+  cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l16 9-7 2 4 8-3 1-4-8-5 5z' fill='black' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E") 4 2, auto !important;
+}
+
+/* High contrast */
+html.a11y-contrast body { background: #fff !important; color: #000 !important; }
+html.a11y-contrast .text-slate-400, html.a11y-contrast .text-slate-500, html.a11y-contrast .text-slate-600, html.a11y-contrast .text-slate-700, html.a11y-contrast .text-slate-800 { color: #000 !important; }
+html.a11y-contrast .text-teal-100, html.a11y-contrast .text-teal-50 { color: #fff !important; }
+html.a11y-contrast .text-teal-700 { color: #053b36 !important; }
+html.a11y-contrast .bg-teal-600, html.a11y-contrast .from-teal-600, html.a11y-contrast .to-teal-700 { background-color: #0a4f49 !important; background-image: none !important; }
+html.a11y-contrast .border-slate-200, html.a11y-contrast .border-slate-300 { border-color: #000 !important; }
+html.a11y-contrast .card { border: 2px solid #000 !important; box-shadow: none !important; }
+html.a11y-contrast .bg-slate-50, html.a11y-contrast .bg-slate-100 { background-color: #f1f1f1 !important; }
+html.a11y-contrast input::placeholder { color: #333 !important; }
+html.a11y-contrast .btn-outline { border: 2px solid #000 !important; color: #000 !important; }
+
+/* Colour-blind friendly: red/green pairs become blue/orange (Okabe-Ito). Status always keeps its text label. */
+html.cb-safe .bg-emerald-600, html.cb-safe .stroke-emerald-600 { background-color: #0072b2 !important; }
+html.cb-safe .hover\:bg-emerald-700:hover, html.cb-safe .bg-emerald-700 { background-color: #005a8e !important; }
+html.cb-safe .text-emerald-600, html.cb-safe .text-emerald-700 { color: #005a8e !important; }
+html.cb-safe .bg-emerald-50 { background-color: #e6f1f8 !important; }
+html.cb-safe .bg-red-600 { background-color: #d55e00 !important; }
+html.cb-safe .hover\:bg-red-700:hover { background-color: #b34e00 !important; }
+html.cb-safe .text-red-600, html.cb-safe .text-red-700 { color: #a64700 !important; }
+html.cb-safe .bg-red-50 { background-color: #fdf0e6 !important; }
+html.cb-safe .border-red-200 { border-color: #f3c9a8 !important; }
+html.cb-safe .stroke-red-600 { stroke: #d55e00 !important; }
+html.cb-safe .animate-pulse-ring { animation-name: none !important; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #0072b2; }

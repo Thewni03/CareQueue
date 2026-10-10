@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { homeFor, useAuth } from './auth.jsx'
+import Accessibility from './components/Accessibility.jsx'
 import Layout from './components/Layout.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
@@ -21,6 +22,7 @@ function Guard({ roles, children }) {
 export default function App() {
   const { user } = useAuth()
   return (
+    <>
     <Routes>
       <Route element={<Layout />}>
         <Route path="/login" element={<Login />} />
@@ -35,5 +37,7 @@ export default function App() {
         <Route path="*" element={<Navigate to={user ? homeFor(user.role) : '/book'} replace />} />
       </Route>
     </Routes>
+    <Accessibility />
+    </>
   )
 }

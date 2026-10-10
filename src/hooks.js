@@ -35,3 +35,41 @@ export function useAlerts(trackers) {
   const enable = async () => { if (supported) setPerm(await Notification.requestPermission()) }
   return { perm, enable }
 }
+
+const reduced = () => typeof window !== 'undefined' &&
+  (window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('a11y-motion'))
+
+/** Pointer-driven 3D tilt with a moving highlight. Spread the result on the element. */
+export function useTilt(max = 6) {
+  const ref = useRef(null)
+  const onMouseMove = (e) => {
+    const el = ref.current
+    if (!el || reduced()) return
+    const r = el.getBoundingClientRect()
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height
+    el.style.setProperty('--ry', `${(x - 0.5) * max * 2}deg`)
+    el.style.setProperty('--rx', `${-(y - 0.5) * max * 2}deg`)
+    el.style.setProperty('--gx', `${x * 100}%`)
+    el.style.setProperty('--gy', `${y * 100}%`)
+  }
+  const onMouseLeave = () => { ref.current?.style.setProperty('--rx', '0deg'); ref.current?.style.setProperty('--ry', '0deg') }
+  return { ref, onMouseMove, onMouseLeave }
+}
+
+/** Counts up to `target` once it is known. */
+export function useCountUp(target, ms = 900) {
+  const [v, setV] = useState(0)
+  useEffect(() => {
+    if (reduced()) { setV(target); return }
+    let raf, start
+    const step = (t) => {
+      if (start === undefined) start = t
+      const p = Math.min(1, (t - start) / ms)
+      setV(Math.round(target * (1 - Math.pow(1 - p, 3))))
+      if (p < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [target])
+  return v
+}

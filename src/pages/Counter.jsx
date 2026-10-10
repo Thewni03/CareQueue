@@ -36,10 +36,10 @@ export default function Counter() {
         <>
           <div className="card text-center">
             <p className="text-sm text-slate-600">Now serving</p>
-            <p className="text-8xl font-extrabold leading-tight text-slate-800 tabular-nums">{s.nowServing || '–'}</p>
+            <p key={s.nowServing} className="animate-pop text-8xl font-extrabold leading-tight text-slate-800 tabular-nums">{s.nowServing || '–'}</p>
             <p className="text-sm text-slate-600">{detail.waiting} waiting · {s.lastIssued} of {s.maxTokens} tokens issued · avg {s.avgMinutesPerPatient} min</p>
           </div>
-          <button className="btn-staff w-full py-8 text-2xl" onClick={next} disabled={busy || detail.waiting <= 0}>{detail.waiting <= 0 ? 'No patients waiting' : 'Next token'}</button>
+          <button className="btn-staff w-full py-8 text-2xl shadow-lift" onClick={next} disabled={busy || detail.waiting <= 0}>{detail.waiting <= 0 ? 'No patients waiting' : 'Next token'}</button>
           <ul className="card divide-y divide-slate-100 p-0">
             {detail.patients.length === 0 && <li className="px-5 py-6 text-center text-sm text-slate-500">No bookings yet.</li>}
             {detail.patients.map((p) => (

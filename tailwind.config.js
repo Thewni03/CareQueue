@@ -1,9 +1,11 @@
 /** Palette: teal-600 primary, slate-600 secondary, slate-50 canvas, white surface,
  *  emerald-600 confirm, teal-600 search/track, red-600 alert, blue-600 counter. */
  export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
+      colors: { sage: { 50: '#F3F7F0', 100: '#E4EEDD', 200: '#C9DDBD', 300: '#A9C79A', 400: '#86AC76', 500: '#6B9360', 600: '#557A4C', 700: '#44613E', 800: '#374E33', 900: '#2C3F2A' } },
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
       boxShadow: {
         soft: '0 6px 24px rgba(15, 118, 110, 0.08)',
@@ -18,6 +20,18 @@
         bob: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-3px)' } },
         fadeUp: { '0%': { opacity: 0, transform: 'translateY(14px)' }, '100%': { opacity: 1, transform: 'none' } },
         draw: { '0%': { strokeDashoffset: 60 }, '100%': { strokeDashoffset: 0 } },
+        sunDown: { '0%': { transform: 'translateY(0) rotate(0)', opacity: 1 }, '100%': { transform: 'translateY(140%) rotate(90deg)', opacity: 0 } },
+        moonRise: { '0%': { transform: 'translateY(140%) rotate(-60deg)', opacity: 0 }, '100%': { transform: 'translateY(0) rotate(0)', opacity: 1 } },
+        moonUp: { '0%': { transform: 'translateY(0)', opacity: 1 }, '100%': { transform: 'translateY(-140%) rotate(40deg)', opacity: 0 } },
+        sunDrop: { '0%': { transform: 'translateY(-140%) rotate(-90deg)', opacity: 0 }, '100%': { transform: 'translateY(0) rotate(0)', opacity: 1 } },
+        blink: { '0%,92%,100%': { transform: 'scaleY(1)' }, '96%': { transform: 'scaleY(0.1)' } },
+        sway: { '0%,100%': { transform: 'rotate(-4deg)' }, '50%': { transform: 'rotate(4deg)' } },
+        tilt: { '0%,100%': { transform: 'rotate(-10deg)' }, '50%': { transform: 'rotate(-6deg)' } },
+        twinkle: { '0%,100%': { opacity: 0.2, transform: 'scale(.7)' }, '50%': { opacity: 1, transform: 'scale(1.1)' } },
+        flow: { '0%': { backgroundPosition: '0 0' }, '100%': { backgroundPosition: '24px 0' } },
+        heartbeat: { '0%,100%': { transform: 'scale(1)' }, '15%': { transform: 'scale(1.12)' }, '30%': { transform: 'scale(1)' }, '45%': { transform: 'scale(1.08)' } },
+        xscan: { '0%': { transform: 'translateY(0)' }, '100%': { transform: 'translateY(340px)' } },
+        shine: { '0%': { transform: 'translateX(-120%)' }, '60%,100%': { transform: 'translateX(220%)' } },
         confetti: { '0%': { transform: 'translate(0,0) rotate(0deg)', opacity: 1 }, '100%': { transform: 'translate(var(--x), var(--y)) rotate(var(--r))', opacity: 0 } },
       },
       animation: {
@@ -30,6 +44,12 @@
         'fade-up': 'fadeUp .45s ease-out both',
         draw: 'draw .6s .2s ease-out both',
         confetti: 'confetti 1.6s ease-out both',
+        'sun-down': 'sunDown .7s ease-in both', 'moon-rise': 'moonRise .7s ease-out both',
+        'moon-up': 'moonUp .7s ease-in both', 'sun-drop': 'sunDrop .7s ease-out both',
+        blink: 'blink 5s infinite', sway: 'sway 5s ease-in-out infinite', tilt: 'tilt 4s ease-in-out infinite',
+        twinkle: 'twinkle 3s ease-in-out infinite', flow: 'flow 1s linear infinite',
+        heartbeat: 'heartbeat 1.4s ease-in-out infinite', xscan: 'xscan 3.2s linear infinite alternate',
+        shine: 'shine 3.5s ease-in-out infinite',
       },
     },
   },

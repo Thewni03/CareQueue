@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { api } from '../api'
 import { usePoll } from '../hooks'
-import { Empty, ErrorNote, Pill } from '../components/ui.jsx'
+import { Empty, ErrorNote, Pill, StatTile } from '../components/ui.jsx'
 
 export default function PharmacyStock() {
   const [items, setItems] = useState(null); const [error, setError] = useState(''); const [filter, setFilter] = useState('')
@@ -19,6 +19,11 @@ export default function PharmacyStock() {
     <div className="space-y-4">
       <h2 className="text-lg font-bold text-teal-700">Your stock</h2>
       <ErrorNote>{error}</ErrorNote>
+      <div className="grid grid-cols-3 gap-3">
+        <StatTile label="Medicines listed" value={(items || []).length} />
+        <StatTile label="Running low" value={(items || []).filter((i) => i.quantity > 0 && i.quantity < 10).length} tone="slate" hint="fewer than 10 left" />
+        <StatTile label="Out of stock" value={(items || []).filter((i) => i.quantity === 0).length} tone="red" />
+      </div>
       <form onSubmit={add} className="card grid gap-3 sm:grid-cols-4">
         <div><label className="label" htmlFor="b">Brand name</label><input id="b" required className="input" value={f.brandName} onChange={(e) => setF({ ...f, brandName: e.target.value })} /></div>
         <div><label className="label" htmlFor="g">Generic name</label><input id="g" required className="input" value={f.genericName} onChange={(e) => setF({ ...f, genericName: e.target.value })} /></div>

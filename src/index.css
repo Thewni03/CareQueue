@@ -62,3 +62,66 @@ html.cb-safe .bg-red-50 { background-color: #fdf0e6 !important; }
 html.cb-safe .border-red-200 { border-color: #f3c9a8 !important; }
 html.cb-safe .stroke-red-600 { stroke: #d55e00 !important; }
 html.cb-safe .animate-pulse-ring { animation-name: none !important; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #0072b2; }
+
+/* ================= Theme: shared ink colour, glass, magical backgrounds ================= */
+:root { --ink: #334155; }
+html.dark { --ink: #cfe3df; color-scheme: dark; }
+.ink { stroke: var(--ink); }
+.ink-fill { fill: var(--ink); }
+.ink-border { border-color: var(--ink); }
+.glass { background: rgba(255,255,255,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.7); }
+html.dark .glass { background: rgba(14,28,30,.72); border-color: rgba(255,255,255,.08); }
+
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(60rem 30rem at 85% -10%, rgba(13,148,136,.13), transparent 60%), radial-gradient(40rem 25rem at -10% 25%, rgba(134,172,118,.16), transparent 60%); }
+html.dark body::before {
+  background:
+    radial-gradient(1.5px 1.5px at 30px 40px, #fff, transparent), radial-gradient(1px 1px at 130px 90px, #bdeee6, transparent),
+    radial-gradient(1.5px 1.5px at 210px 150px, #fff, transparent), radial-gradient(1px 1px at 80px 170px, #e6fffa, transparent),
+    radial-gradient(50rem 28rem at 85% -10%, rgba(20,184,166,.16), transparent 60%), radial-gradient(40rem 25rem at -10% 30%, rgba(99,102,241,.12), transparent 60%);
+  background-size: 260px 200px, 260px 200px, 260px 200px, 260px 200px, auto, auto; }
+html.dark body::after { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; animation: twinkle 4s ease-in-out infinite;
+  background: radial-gradient(2px 2px at 60px 120px, #fff, transparent), radial-gradient(2px 2px at 190px 30px, #cffafe, transparent), radial-gradient(1.5px 1.5px at 150px 190px, #fff, transparent);
+  background-size: 300px 240px; }
+html.theme-fade, html.theme-fade * { transition: background-color .6s ease, color .6s ease, border-color .6s ease, fill .6s ease, stroke .6s ease !important; }
+
+/* ================= Dark mode overrides for the existing utility classes ================= */
+html.dark body { background: #0a1214; color: #e2efec; }
+html.dark .bg-white { background-color: #101d1f !important; }
+html.dark .bg-slate-50 { background-color: #0d181a !important; }
+html.dark .bg-slate-100, html.dark .hover\:bg-slate-100:hover, html.dark .hover\:bg-slate-50:hover { background-color: #16282a !important; }
+html.dark .bg-slate-200 { background-color: #1d3234 !important; }
+html.dark .bg-slate-300 { background-color: #35504f !important; }
+html.dark .text-slate-800, html.dark .text-slate-700 { color: #e8f3f1 !important; }
+html.dark .text-slate-600 { color: #bcd0cc !important; }
+html.dark .text-slate-500 { color: #97b0ab !important; }
+html.dark .text-slate-400 { color: #7b9792 !important; }
+html.dark .border-slate-100, html.dark .border-slate-200 { border-color: #1f3335 !important; }
+html.dark .border-slate-300 { border-color: #2c4648 !important; }
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1f3335 !important; }
+html.dark .ring-slate-200 { --tw-ring-color: #1f3335 !important; }
+html.dark .bg-teal-50 { background-color: #0f2f2c !important; }
+html.dark .bg-emerald-50 { background-color: #0f2e24 !important; }
+html.dark .bg-red-50 { background-color: #341618 !important; }
+html.dark .bg-blue-50 { background-color: #13233f !important; }
+html.dark .bg-sage-50, html.dark .bg-sage-100 { background-color: #17261f !important; }
+html.dark .text-teal-700 { color: #5eead4 !important; }
+html.dark .text-emerald-700, html.dark .text-emerald-600 { color: #6ee7b7 !important; }
+html.dark .text-red-700, html.dark .text-red-600 { color: #fca5a5 !important; }
+html.dark .text-blue-700 { color: #93c5fd !important; }
+html.dark .text-sage-700, html.dark .text-sage-600 { color: #b6d6a8 !important; }
+html.dark .border-red-200 { border-color: #7f1d1d !important; }
+html.dark .stroke-slate-100, html.dark .stroke-slate-200 { stroke: #1f3335 !important; }
+html.dark .card { background: #101d1f; border-color: #1f3335; box-shadow: 0 8px 30px rgba(0,0,0,.35); }
+html.dark .input { background: #0d181a; border-color: #2c4648; color: #e8f3f1; }
+html.dark .btn-outline { background: #101d1f; border-color: #2c4648; color: #e8f3f1; }
+html.dark .btn-outline:hover { background: #16282a; }
+html.dark select option { background: #0d181a; color: #e8f3f1; }
+
+/* sliding stripes used on journey connectors */
+.stripes { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 6px, transparent 6px 12px); background-size: 24px 100%; }
+
+/* circular reveal used by the sun/moon switch (View Transitions API) */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }

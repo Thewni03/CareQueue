@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { usePoll } from '../hooks'
 import { dayLabel, money, time12 } from '../fmt'
-import { Empty, ErrorNote } from '../components/ui.jsx'
+import { Empty, ErrorNote, StatTile } from '../components/ui.jsx'
 
 const todayISO = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)
 
@@ -24,6 +24,11 @@ export default function Schedule() {
     <div className="space-y-6">
       <h2 className="text-lg font-bold text-teal-700">Doctors & sessions</h2>
       <ErrorNote>{error}</ErrorNote>
+      <div className="grid grid-cols-3 gap-3">
+        <StatTile label="Doctors" value={doctors.length} />
+        <StatTile label="Upcoming sessions" value={sessions ? sessions.length : 0} tone="green" />
+        <StatTile label="Tokens booked" value={(sessions || []).reduce((n, x) => n + x.taken, 0)} tone="blue" hint="across upcoming sessions" />
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         <form onSubmit={addDoctor} className="card space-y-3">
           <h3 className="font-bold">Add a doctor</h3>

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useCountUp } from '../hooks'
 
 export const ErrorNote = ({ children }) =>
   children ? <p role="alert" className="animate-fade-up rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700">{children}</p> : null
@@ -28,3 +29,17 @@ export function Modal({ onClose, children, label }) {
 }
 
 export const payTone = { PAID: 'green', PAY_AT_COUNTER: 'slate', UNPAID: 'red', REFUND_PENDING: 'blue' }
+
+const bars = { teal: 'bg-teal-600', green: 'bg-emerald-600', blue: 'bg-blue-600', slate: 'bg-slate-500', red: 'bg-red-600' }
+/** Dashboard number tile. Numbers count up; strings are shown as given. */
+export function StatTile({ label, value, hint, tone = 'teal' }) {
+  const n = useCountUp(typeof value === 'number' ? value : 0)
+  return (
+    <div className="card relative overflow-hidden py-4 pl-6 hover:-translate-y-0.5 hover:shadow-lift">
+      <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1.5 ${bars[tone]}`} />
+      <p className="text-xs font-semibold text-slate-500">{label}</p>
+      <p className="mt-1 text-3xl font-extrabold tabular-nums text-teal-700">{typeof value === 'number' ? n : value}</p>
+      {hint && <p className="text-xs text-slate-500">{hint}</p>}
+    </div>
+  )
+}

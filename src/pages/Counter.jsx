@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { usePoll } from '../hooks'
 import { dayLabel, payLabel, time12 } from '../fmt'
-import { Empty, ErrorNote, Pill, payTone } from '../components/ui.jsx'
+import { Empty, ErrorNote, Pill, StatTile, payTone } from '../components/ui.jsx'
 
 export default function Counter() {
   const [sessions, setSessions] = useState(null); const [sel, setSel] = useState(null)
@@ -34,6 +34,15 @@ export default function Counter() {
       )}
       {s && (
         <>
+          <div className="stagger grid grid-cols-3 gap-3 text-center">
+            {[['Waiting', detail.waiting], ['Issued', `${s.lastIssued}/${s.maxTokens}`], ['Avg pace', `${s.avgMinutesPerPatient} min`]].map(([l, v]) => (
+              <div key={l} className="card hover:-translate-y-1 hover:shadow-lift"><p className="text-xs font-semibold text-slate-500">{l}</p><p className="text-2xl font-extrabold tabular-nums text-teal-700">{v}</p></div>))}
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <StatTile label="Waiting" value={detail.waiting} />
+            <StatTile label="Tokens issued" value={s.lastIssued} tone="green" hint={`of ${s.maxTokens}`} />
+            <StatTile label="Avg per patient" value={`${s.avgMinutesPerPatient} min`} tone="blue" />
+          </div>
           <div className="card text-center">
             <p className="text-sm text-slate-600">Now serving</p>
             <p key={s.nowServing} className="animate-pop text-8xl font-extrabold leading-tight text-slate-800 tabular-nums">{s.nowServing || '–'}</p>

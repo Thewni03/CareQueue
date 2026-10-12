@@ -13,4 +13,4 @@ export function AuthProvider({ children }) {
   return <Ctx.Provider value={{ user, login, register, logout }}>{children}</Ctx.Provider>
 }
 
-export const homeFor = (role) => ({ HOSPITAL: '/counter', PHARMACY: '/stock', ADMIN: '/admin' }[role] || '/book')
+export const homeFor = (role) => ({ HOSPITAL: '/counter', PHARMACY: '/stock', ADMIN: '/admin' }[role] || '/')

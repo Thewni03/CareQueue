@@ -7,6 +7,7 @@ import { money } from '../fmt'
 import { HospitalArt } from '../components/HospitalCard.jsx'
 import { Avatar, Empty, ErrorNote, Modal, Pill, payTone, Skeleton } from '../components/ui.jsx'
 
+const ROLE_FILTERS = [['ALL', 'All'], ['HOSPITAL', 'Hospital'], ['ADMIN', 'Admin'], ['PATIENT', 'Patient'], ['PHARMACY', 'Pharmacy']]
 const TABS = ['Overview', 'Hospitals', 'Pharmacies', 'Users', 'Payments']
 const PATHS = { Overview: '/admin/stats', Hospitals: '/admin/hospitals', Pharmacies: '/admin/pharmacies', Users: '/admin/users', Payments: '/admin/payments' }
 const Pencil = () => <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M13.5 6.5l4 4" /></svg>
@@ -148,19 +149,29 @@ function Orgs({ kind, rows, reload, setError }) {
 }
 
 function Users({ rows, reload, setError }) {
-  const [edit, setEdit] = useState(null); const [role, setRole] = useState('PATIENT'); const [busy, setBusy] = useState(false)
+  const [filter, setFilter] = useState('ALL'); const [edit, setEdit] = useState(null); const [role, setRole] = useState('PATIENT'); const [busy, setBusy] = useState(false)
   const open = (u) => { setEdit(u); setRole(u.role) }
   const save = async () => { setBusy(true); try { await api(`/admin/users/${edit.id}/role`, { method: 'PUT', body: { role } }); setEdit(null); reload() } catch (e) { setError(e.message) } finally { setBusy(false) } }
   if (!rows) return <Skeleton className="h-64" />
+  const count = (k) => (k === 'ALL' ? rows.length : rows.filter((u) => u.role === k).length)
+  const shown = filter === 'ALL' ? rows : rows.filter((u) => u.role === filter)
   return (
     <>
+      <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="Filter users by role">
+        {ROLE_FILTERS.map(([k, label]) => (
+          <button key={k} type="button" aria-pressed={filter === k} onClick={() => setFilter(k)}
+            className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition ${filter === k ? 'border-teal-600 bg-teal-600 text-white shadow' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'}`}>
+            {label}<span className={`rounded-full px-2 text-xs ${filter === k ? 'bg-white/25' : 'bg-slate-100 text-slate-600'}`}>{count(k)}</span>
+          </button>))}
+      </div>
+      {shown.length === 0 ? <Empty>No {ROLE_FILTERS.find(([k]) => k === filter)[1].toLowerCase()} users yet.</Empty> : (
       <ul className="card divide-y divide-slate-100 p-0">
-        {rows.map((u) => (
+        {shown.map((u) => (
           <li key={u.id} className="flex items-center gap-3 px-5 py-3 text-sm">
             <Avatar name={u.name} className="h-10 w-10 text-xs" /><div className="min-w-0 flex-1"><p className="truncate font-semibold">{u.name}</p><p className="truncate text-slate-500">{u.email}</p></div>
             <Pill tone="teal">{u.role.toLowerCase()}</Pill><button className="btn-outline flex items-center gap-1.5 px-3 py-1.5" onClick={() => open(u)}><Pencil />Edit</button>
           </li>))}
-      </ul>
+      </ul>)}
       {edit && (
         <Modal onClose={() => setEdit(null)} label={`Edit ${edit.name}`}>
           <h2 className="text-lg font-extrabold text-teal-700">Edit user</h2>
@@ -171,6 +182,68 @@ function Users({ rows, reload, setError }) {
     </>
   )
 }
+
+const rs = (n) => `Rs. ${Number(n || 0).toLocaleString('en-LK')}`
+const Rs = ({ v }) => <>{rs(useCountUp(v))}</>
+const METHODS = [['COUNTER', 'Pay at counter'], ['APPLE_PAY', 'Apple Pay'], ['CARD', 'Card']]
+const TILE_ORDER = ['APPLE_PAY', 'COUNTER', 'CARD']
+const sumOf = (list) => list.reduce((n, p) => n + p.amount, 0)
+
+function Payments({ rows }) {
+  const [filter, setFilter] = useState('ALL')
+  if (!rows) return <Skeleton className="h-64" />
+  if (rows.length === 0) return <Empty>No payments yet.</Empty>
+  const of = (m) => rows.filter((p) => p.method === m)
+  const stats = Object.fromEntries(METHODS.map(([m]) => {
+    const all = of(m)
+    return [m, { collected: sumOf(all.filter((p) => p.status === 'PAID')), pending: sumOf(all.filter((p) => p.status === 'PAY_AT_COUNTER')), patients: new Set(all.map((p) => p.patientId)).size, count: all.length }]
+  }))
+  const refunds = rows.filter((p) => p.status === 'REFUND_PENDING'), refundTotal = sumOf(refunds)
+  const maxPaid = Math.max(1, ...METHODS.map(([m]) => stats[m].collected))
+  const label = Object.fromEntries(METHODS)
+  const filters = [['ALL', 'All'], ...METHODS, ['REFUND', 'Refunds']]
+  const shown = filter === 'ALL' ? rows : filter === 'REFUND' ? refunds : of(filter)
+  return (
+    <div className="space-y-5">
+      <section className="card space-y-4">
+        <h3 className="font-bold">Money by payment method</h3>
+        {METHODS.map(([m, name]) => (
+          <div key={m}>
+            <div className="flex items-baseline justify-between gap-3"><p className="font-semibold">{name}</p><p className="text-lg font-extrabold tabular-nums text-teal-700"><Rs v={stats[m].collected} /></p></div>
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden="true"><div className="h-full rounded-full bg-teal-600 transition-all duration-700" style={{ width: `${(stats[m].collected / maxPaid) * 100}%` }} /></div>
+            {m === 'COUNTER' && stats[m].pending > 0 && <p className="mt-1 text-xs text-slate-500">{rs(stats[m].pending)} still to be collected at the counter</p>}
+          </div>))}
+        <div className="flex items-baseline justify-between gap-3 border-t border-slate-100 pt-3"><p className="font-semibold text-red-700">Refund</p><p className="text-lg font-extrabold tabular-nums text-red-700"><Rs v={refundTotal} /></p></div>
+        <p className="text-xs text-slate-500">{refunds.length} {refunds.length === 1 ? 'booking is' : 'bookings are'} waiting for a refund. Totals cover the latest {rows.length} payments{rows.length >= 100 ? ' (the most the log returns)' : ''}.</p>
+      </section>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        {TILE_ORDER.map((m) => (
+          <div key={m} className="card hover:-translate-y-1 hover:shadow-lift">
+            <p className="font-semibold text-slate-600">{label[m]}</p>
+            <p className="mt-1 text-4xl font-extrabold tabular-nums text-teal-700"><Count v={stats[m].patients} /></p>
+            <p className="text-sm text-slate-500">patients who use this method</p>
+            <p className="mt-1 text-xs text-slate-500">{stats[m].count} {stats[m].count === 1 ? 'payment' : 'payments'}</p>
+          </div>))}
+      </div>
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter payments">
+          {filters.map(([k, l]) => <button key={k} type="button" aria-pressed={filter === k} onClick={() => setFilter(k)} className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${filter === k ? 'border-teal-600 bg-teal-600 text-white shadow' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'}`}>{l}</button>)}
+        </div>
+        {shown.length === 0 ? <Empty>No payments in this category.</Empty> : (
+          <ul className="card divide-y divide-slate-100 p-0">
+            {shown.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm">
+                <div><p className="font-semibold">{p.patientName} · {rs(p.amount)}</p><p className="text-slate-500">{p.hospitalName} · {label[p.method] || p.method}{p.cardLast4 ? ` ····${p.cardLast4}` : ''} · {p.reference}</p></div>
+                <Pill tone={payTone[p.status]}>{p.status.replace('_', ' ').toLowerCase()}</Pill>
+              </li>))}
+          </ul>)}
+      </section>
+    </div>
+  )
+}
+const Count = ({ v }) => <>{useCountUp(v)}</>
 
 export default function Admin() {
   const [tab, setTab] = useState('Overview'); const [error, setError] = useState(''); const [data, setData] = useState({})
@@ -191,14 +264,7 @@ export default function Admin() {
         {tab === 'Hospitals' && <Orgs kind="hospital" rows={rows} reload={load} setError={setError} />}
         {tab === 'Pharmacies' && <Orgs kind="pharmacy" rows={rows} reload={load} setError={setError} />}
         {tab === 'Users' && <Users rows={rows} reload={load} setError={setError} />}
-        {tab === 'Payments' && (!rows ? <Skeleton className="h-64" /> : rows.length === 0 ? <Empty>No payments yet.</Empty> : (
-          <ul className="card divide-y divide-slate-100 p-0">
-            {rows.map((p) => (
-              <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm">
-                <div><p className="font-semibold">{p.patientName} · {money(p.amount)}</p><p className="text-slate-500">{p.hospitalName} · {p.method.replace('_', ' ').toLowerCase()}{p.cardLast4 ? ` ····${p.cardLast4}` : ''} · {p.reference}</p></div>
-                <Pill tone={payTone[p.status]}>{p.status.replace('_', ' ').toLowerCase()}</Pill>
-              </li>))}
-          </ul>))}
+        {tab === 'Payments' && <Payments rows={rows} />}
       </div>
     </div>
   )

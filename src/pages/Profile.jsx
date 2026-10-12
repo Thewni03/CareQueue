@@ -50,7 +50,7 @@ export default function Profile() {
           <p className="truncate text-sm text-slate-500">{user.email}</p><span className="mt-1 inline-block rounded-full bg-teal-50 px-3 py-0.5 text-xs font-bold text-teal-700">{ROLE[user.role]}</span></div>
         <Clock />
       </section>
-      <p className="-mt-3 text-xs text-slate-500">Your profile photo is saved on this device only.</p>
+   
 
       <div className="grid items-start gap-5 md:grid-cols-5">
         {patient ? (
